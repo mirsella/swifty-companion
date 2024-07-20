@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">swifty-protein</string>
+    <string name="title_activity_main">swifty-protein</string>
+    <string name="package_name">com.swifty_protein</string>
+    <string name="custom_url_scheme">com.swifty_protein</string>
+</resources>
