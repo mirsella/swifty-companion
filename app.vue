@@ -1,3 +1,7 @@
+<script setup lang="ts"></script>
+
 <template>
-  <div></div>
+  <div>
+    <NuxtPage class="h-screen" />
+  </div>
 </template>

@@ -52,3 +52,9 @@ try {
 } catch(Exception e) {
     logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
 }
+
+// @capacitor-community/generic-oauth2
+android.defaultConfig.manifestPlaceholders = [
+  // change to the 'custom_url_scheme' value in your strings.xml. They need to be the same. e.g.
+  "appAuthRedirectScheme": "swiftycompanion"
+]

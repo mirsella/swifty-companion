@@ -5,4 +5,10 @@ export default defineNuxtConfig({
   modules: ["@nuxtjs/tailwindcss"],
   // for capacitor
   ssr: false,
+  runtimeConfig: {
+    public: {
+      CLIENT_ID: process.env.CLIENT_ID,
+      CLIENT_SECRET: process.env.CLIENT_SECRET,
+    },
+  },
 });
