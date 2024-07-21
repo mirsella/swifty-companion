@@ -1,0 +1,3 @@
+[main 87b1b8c] add capacitor oauth generic plugin and rename app protein-
+ 10 files changed, 27 insertions(+), 14 deletions(-)
+ create mode 100644 companion

@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@capacitor-community/generic-oauth2':
+        specifier: ^6.0.0
+        version: 6.0.0(@capacitor/core@6.1.1)
       '@capacitor/android':
         specifier: ^6.1.1
         version: 6.1.1(@capacitor/core@6.1.1)
@@ -223,6 +226,11 @@ packages:
   '@babel/types@7.24.9':
     resolution: {integrity: sha512-xm8XrMKz0IlUdocVbYJe0Z9xEgidU7msskG8BbhnTPK/HZ2z/7FP7ykqPgrUH+C+r414mNfNWam1f2vqOjqjYQ==}
     engines: {node: '>=6.9.0'}
+
+  '@capacitor-community/generic-oauth2@6.0.0':
+    resolution: {integrity: sha512-iQV+zwZyRFZUGxZFyeRTETgm+Ix+wnh5jwL9xYRmVSX3P1TH8xMaVmGUeWTJu8fizgwhQ4xRyaSxtIWKGMZ4Jg==}
+    peerDependencies:
+      '@capacitor/core': ^6.0.0
 
   '@capacitor/android@6.1.1':
     resolution: {integrity: sha512-rhO/nH6NJizGV5KizoIoGxCmkos3HnyUzI9TNv8IVy/C8h6lPM5Gt9cxGclb6k0OBTtgv6iJVo654+m4kzv0Qg==}
@@ -4001,6 +4009,10 @@ snapshots:
       '@babel/helper-string-parser': 7.24.8
       '@babel/helper-validator-identifier': 7.24.7
       to-fast-properties: 2.0.0
+
+  '@capacitor-community/generic-oauth2@6.0.0(@capacitor/core@6.1.1)':
+    dependencies:
+      '@capacitor/core': 6.1.1
 
   '@capacitor/android@6.1.1(@capacitor/core@6.1.1)':
     dependencies:
