@@ -1,8 +1,7 @@
 import { GenericOAuth2 } from "@capacitor-community/generic-oauth2";
 
-export default defineNuxtPlugin((nuxtApp) => {
+export default defineNuxtPlugin(async (nuxtApp) => {
   const runtimeConfig = useRuntimeConfig();
-
   const oauth2Options = {
     authorizationBaseUrl: "https://api.intra.42.fr/oauth/authorize",
     additionalParameters: {
@@ -20,9 +19,11 @@ export default defineNuxtPlugin((nuxtApp) => {
     },
   };
 
-  async function getToken(code) {
+  // grant_type can be "authorization_code" or "refresh_token"
+  async function getToken(code: string, grant_type: string) {
+    console.log("getToken", grant_type);
     const formData = new FormData();
-    formData.append("grant_type", "authorization_code");
+    formData.append("grant_type", grant_type);
     formData.append("code", code);
     formData.append("client_id", runtimeConfig.public.CLIENT_ID);
     formData.append("client_secret", runtimeConfig.public.CLIENT_SECRET);
@@ -32,65 +33,54 @@ export default defineNuxtPlugin((nuxtApp) => {
       body: formData,
     });
     const data = await response.json();
-    localStorage.setItem("accessToken", data.access_token);
+    console.log("getToken", data);
+    localStorage.setItem("token", data.access_token);
+    localStorage.setItem("tokenExpiry", data.secret_valid_until);
     localStorage.setItem("refreshToken", data.refresh_token);
-    return data;
   }
 
-  async function refreshAccessToken(refreshToken) {
-    const formData = new FormData();
-    formData.append("grant_type", "refresh_token");
-    formData.append("refresh_token", refreshToken);
-    formData.append("client_id", runtimeConfig.public.CLIENT_ID);
-    formData.append("client_secret", runtimeConfig.public.CLIENT_SECRET);
-    const response = await fetch("https://api.intra.42.fr/oauth/token", {
-      method: "POST",
-      body: formData,
-    });
-    const data = await response.json();
-    localStorage.setItem("accessToken", data.access_token);
-    localStorage.setItem("refreshToken", data.refresh_token);
-    return data;
-  }
-
-  async function validateToken(accessToken) {
-    try {
-      const response = await fetch("https://api.intra.42.fr/oauth/validate", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      if (!response.ok) throw new Error("Token validation failed");
-      return true;
-    } catch {
-      return false;
+  try {
+    let token = localStorage.getItem("token");
+    if (!token) {
+      console.log("No token, starting oauth");
+      await GenericOAuth2.authenticate(oauth2Options)
+        .then(async (res) => {
+          const code = res.authorization_response.code;
+          if (!code) {
+            throw new Error(
+              "Authorization process did not return a code: " +
+                JSON.stringify(res),
+            );
+          }
+          console.log("Got auth code", code);
+          await getToken(code, "authorization_code");
+        })
+        .catch((e) => showError(e));
     }
-  }
-
-  async function login() {
-    try {
-      let accessToken = localStorage.getItem("accessToken");
-      if (accessToken && (await validateToken(accessToken))) {
-        return accessToken;
-      }
-
-      const refreshToken = localStorage.getItem("refreshToken");
-      if (refreshToken) {
-        return refreshAccessToken(refreshToken);
-      }
-
-      const res = await GenericOAuth2.authenticate(oauth2Options);
-      if (!res.authorization_response || !res.authorization_response.code) {
-        throw new Error(
-          "Authorization process did not return a code: " + JSON.stringify(res),
-        );
-      }
-
-      return getToken(res.authorization_response.code);
-    } catch (error) {
-      console.error("Authentication error:", error);
+    let tokenExpiry = new Date(localStorage.getItem("tokenExpiry") || 0 * 1000);
+    if (tokenExpiry < new Date()) {
+      console.log("Token expired, refreshing");
+      await getToken(
+        localStorage.getItem("refreshToken") || "",
+        "refresh_token",
+      );
     }
+  } catch (error) {
+    console.error("Authentication error:", error);
+  }
+  console.log("42 plugin loaded and authenticated");
+
+  async function getLoginData(login: string): Promise<object> {
+    // TODO: implement
+    return {};
+  }
+  async function signout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("tokenExpiry");
+    reloadNuxtApp();
   }
 
-  nuxtApp.provide("login", login);
+  nuxtApp.provide("getLoginData", getLoginData);
+  nuxtApp.provide("signout", signout);
+  // use the return {} method of providing hepler
 });
