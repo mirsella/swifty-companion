@@ -34,13 +34,21 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     });
     const data = await response.json();
     console.log("getToken", data);
-    localStorage.setItem("token", data.access_token);
-    localStorage.setItem("tokenExpiry", data.secret_valid_until);
-    localStorage.setItem("refreshToken", data.refresh_token);
+    localStorage.token = data.access_token;
+    localStorage.tokenExpiry = data.secret_valid_until;
+    localStorage.refreshToken = data.refresh_token;
+  }
+
+  async function refreshTokenIfNeeded() {
+    let tokenExpiry = new Date(localStorage.tokenExpiry || 0 * 1000);
+    if (tokenExpiry < new Date()) {
+      console.log("Token expired, refreshing");
+      await getToken(localStorage.refreshToken || "", "refresh_token");
+    }
   }
 
   try {
-    let token = localStorage.getItem("token");
+    let token = localStorage.token;
     if (!token) {
       console.log("No token, starting oauth");
       await GenericOAuth2.authenticate(oauth2Options)
@@ -57,30 +65,33 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         })
         .catch((e) => showError(e));
     }
-    let tokenExpiry = new Date(localStorage.getItem("tokenExpiry") || 0 * 1000);
-    if (tokenExpiry < new Date()) {
-      console.log("Token expired, refreshing");
-      await getToken(
-        localStorage.getItem("refreshToken") || "",
-        "refresh_token",
-      );
-    }
+    await refreshTokenIfNeeded();
   } catch (error) {
     console.error("Authentication error:", error);
   }
   console.log("42 plugin loaded and authenticated");
 
   async function getLoginData(login: string): Promise<object> {
-    // TODO: implement
-    return {};
+    refreshTokenIfNeeded();
+    const res = await fetch(`https://api.intra.42.fr/v2/users/${login}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.token}`,
+      },
+    }).then((e) => e.json());
+    console.log(res);
+    return res;
   }
+
   async function signout() {
     localStorage.removeItem("token");
     localStorage.removeItem("tokenExpiry");
     reloadNuxtApp();
   }
 
-  nuxtApp.provide("getLoginData", getLoginData);
-  nuxtApp.provide("signout", signout);
-  // use the return {} method of providing hepler
+  return {
+    provide: {
+      signout,
+      getLoginData,
+    },
+  };
 });
