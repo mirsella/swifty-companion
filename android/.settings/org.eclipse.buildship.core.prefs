@@ -1,4 +1,4 @@
-arguments=--init-script /home/mirsella/.cache/nvim/jdtls/swifty_companion/config/org.eclipse.osgi/55/0/.cp/gradle/init/init.gradle
+arguments=--init-script /home/mirsella/.cache/nvim/jdtls/swifty-companion/config/org.eclipse.osgi/55/0/.cp/gradle/init/init.gradle
 auto.sync=false
 build.scans.enabled=false
 connection.gradle.distribution=GRADLE_DISTRIBUTION(WRAPPER)

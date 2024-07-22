@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">swifty_companion</string>
-    <string name="title_activity_main">swifty_companion</string>
+    <string name="app_name">swifty-companion</string>
+    <string name="title_activity_main">swifty-companion</string>
     <string name="package_name">com.swifty_companion</string>
     <string name="custom_url_scheme">swiftycompanion</string>
 </resources>

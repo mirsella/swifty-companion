@@ -1,0 +1,50 @@
+name: Build Nuxtjs and Capacitorjs
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  nuxtjs-build:
+    runs-on: ubuntu-latest
+    outputs:
+      artifact-path: ${{ steps.build.outputs.artifact-path }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install -g pnpm
+      - run: pnpm install
+      - run: pnpm run build
+      - run: pnpm run generate
+      - id: build
+        run: echo "artifact-path=$(pwd)/.output/public" >> $GITHUB_OUTPUT
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nuxtjs-output
+          path: ${{ steps.build.outputs.artifact-path }}
+
+  capacitor-build:
+    needs: nuxtjs-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+      - uses: actions/download-artifact@v4
+        with:
+          name: nuxtjs-output
+          path: .output/public/
+      - run: npm install -g pnpm
+      - run: pnpm install
+      - run: pnpm cap sync
+      - name: Build Android
+        run: |
+          cd android
+          ./gradlew assembleDebug
