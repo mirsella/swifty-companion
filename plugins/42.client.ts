@@ -29,6 +29,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     formData.append("client_secret", runtimeConfig.public.CLIENT_SECRET);
     formData.append("redirect_uri", oauth2Options.web.redirectUrl);
     const response = await fetch("https://api.intra.42.fr/oauth/token", {
+      mode: "no-cors",
       method: "POST",
       body: formData,
     });
@@ -74,6 +75,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   async function getLoginData(login: string): Promise<object> {
     refreshTokenIfNeeded();
     const res = await fetch(`https://api.intra.42.fr/v2/users/${login}`, {
+      mode: "no-cors",
       headers: {
         Authorization: `Bearer ${localStorage.token}`,
       },
