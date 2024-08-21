@@ -1,4 +1,5 @@
 import { GenericOAuth2 } from "@capacitor-community/generic-oauth2";
+import { CapacitorHttp } from "@capacitor/core";
 
 export default defineNuxtPlugin(async (nuxtApp) => {
   const runtimeConfig = useRuntimeConfig();
@@ -28,15 +29,21 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     formData.append("client_id", runtimeConfig.public.CLIENT_ID);
     formData.append("client_secret", runtimeConfig.public.CLIENT_SECRET);
     formData.append("redirect_uri", oauth2Options.web.redirectUrl);
-    const response = await fetch("https://api.intra.42.fr/oauth/token", {
-      // mode: "no-cors",
-      method: "POST",
-      body: formData,
+    // const response = await fetch("https://api.intra.42.fr/oauth/token", {
+    //   mode: "cors",
+    //   method: "POST",
+    //   body: formData,
+    // });
+    const response = await CapacitorHttp.post({
+      url: "https://api.intra.42.fr/oauth/token",
+      data: formData,
     });
-    if (!response.ok) {
-      throw new Error("getToken response not ok: " + response);
+    if (response.status !== 200) {
+      throw new Error(
+        `getToken response not ok: status ${response.status}, data ${response.data}`,
+      );
     }
-    const data = await response.json();
+    const data = response.data;
     console.log("getToken data", data);
     localStorage.token = data.access_token;
     localStorage.tokenExpiry = data.secret_valid_until;
@@ -53,14 +60,29 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
   async function getLoginData(login: string): Promise<object> {
     refreshTokenIfNeeded();
-    const res = await fetch(`https://api.intra.42.fr/v2/users/${login}`, {
-      // mode: "no-cors",
+    // const res = await fetch(`https://api.intra.42.fr/v2/users/${login}`, {
+    //   mode: "cors",
+    //   headers: {
+    //     // Accept: "application/json",
+    //     // "Content-Type": "application/json",
+    //     Authorization: `Bearer ${localStorage.token}`,
+    //   },
+    // }).then((e) => e.json());
+    const response = await CapacitorHttp.get({
+      url: `https://api.intra.42.fr/v2/users/${login}`,
       headers: {
+        // Accept: "application/json",
+        // "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.token}`,
       },
-    }).then((e) => e.json());
-    console.log("getLoginData", res);
-    return res;
+    });
+    if (response.status !== 200) {
+      throw new Error(
+        `getToken response not ok: status ${response.status}, data ${response.data}`,
+      );
+    }
+    console.log("getLoginData", response);
+    return response.data;
   }
 
   async function signout() {

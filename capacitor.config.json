@@ -1,5 +1,10 @@
 {
   "appId": "com.swifty_companion",
   "appName": "swifty-companion",
-  "webDir": ".output/public"
+  "webDir": ".output/public",
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
 }
