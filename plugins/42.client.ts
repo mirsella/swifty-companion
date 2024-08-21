@@ -78,7 +78,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     });
     if (response.status !== 200) {
       throw new Error(
-        `getToken response not ok: status ${response.status}, data ${response.data}`,
+        `getLoginData response not ok: status ${response.status}, data ${response.data}`,
       );
     }
     console.log("getLoginData", response);
