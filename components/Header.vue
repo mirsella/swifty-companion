@@ -5,7 +5,7 @@
       <NuxtLink
         v-if="$route.name !== 'index'"
         to="/"
-        class="size-6 mx-4 i-carbon-home"
+        class="size-6 mx-4 i-carbon-search"
       >
         Swifty Companion
       </NuxtLink>
