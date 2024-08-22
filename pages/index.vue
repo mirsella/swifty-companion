@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const { $signout, $getLoginData } = useNuxtApp();
-const login = ref("lgillard");
+const { $getLoginData } = useNuxtApp();
+const login = ref("");
 const data = ref({});
 async function search() {
   try {
-    data.value = await $getLoginData(login.value);
+    data.value = await $getLoginData(login.value || "lgillard");
   } catch (error) {
     console.error(error);
     showError("erreur lors de la recherche: " + error);
@@ -13,16 +13,13 @@ async function search() {
 </script>
 
 <template>
-  <div class="mx-auto max-w-xl space-y-8">
-    <button class="btn btn-primary btn-wide" @click="$signout()">
-      signout
-    </button>
+  <div>
     <div class="space-x-4">
       <input
         v-model="login"
         type="text"
         class="input input-primary"
-        placeholder="login"
+        placeholder="login (default: lgillard)"
       />
       <button class="btn btn-primary" @click="search()">search</button>
     </div>
