@@ -42,13 +42,31 @@ const skills = computed(() => {
       <div class="card-body">
         <span class="card-title">Skills</span>
         <div v-for="skill in skills" :key="skill.id" class="m-2">
-          {{ skill.name }}: {{ skill.level.toFixed(2) }}
+          <span class="font-bold"> {{ skill.name }}: </span>
+          {{ skill.level.toFixed(2) }}
         </div>
       </div>
     </div>
     <div class="card card-compact bg-base-100 shadow-xl m-4">
       <div class="card-body">
         <span class="card-title">Projects</span>
+        <div
+          v-for="project in data?.projects_users"
+          :key="project.id"
+          class="m-2 shadow-md rounded-lg p-1"
+          :class="{
+            'shadow-error': project['validated?'] === false,
+            'shadow-success': project['validated?'] === true,
+          }"
+        >
+          <div class="w-full">
+            <span class="font-bold">{{ project.project.name }}</span> status:
+            {{ project.status }}
+          </div>
+          <span v-if="project.final_mark">
+            mark: {{ project.final_mark }}
+          </span>
+        </div>
       </div>
     </div>
   </div>
