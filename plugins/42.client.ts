@@ -1,5 +1,5 @@
 import { GenericOAuth2 } from "@capacitor-community/generic-oauth2";
-import { CapacitorHttp } from "@capacitor/core";
+import { Capacitor, CapacitorHttp } from "@capacitor/core";
 
 export default defineNuxtPlugin(async (nuxtApp) => {
   const runtimeConfig = useRuntimeConfig();
@@ -23,27 +23,25 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   // grant_type can be "authorization_code" or "refresh_token"
   async function getToken(code: string, grant_type: string) {
     console.log("getToken grant_type", grant_type);
-    const formData = new FormData();
-    formData.append("grant_type", grant_type);
-    formData.append("code", code);
-    formData.append("client_id", runtimeConfig.public.CLIENT_ID);
-    formData.append("client_secret", runtimeConfig.public.CLIENT_SECRET);
-    formData.append("redirect_uri", oauth2Options.web.redirectUrl);
-    // const response = await fetch("https://api.intra.42.fr/oauth/token", {
-    //   mode: "cors",
-    //   method: "POST",
-    //   body: formData,
-    // });
-    const response = await CapacitorHttp.post({
-      url: "https://api.intra.42.fr/oauth/token",
-      data: formData,
+    const req_data = {
+      grant_type,
+      code,
+      client_id: runtimeConfig.public.CLIENT_ID,
+      client_secret: runtimeConfig.public.CLIENT_SECRET,
+      // @ts-ignore: getPlatform always returns android or web
+      redirect_uri: oauth2Options[Capacitor.getPlatform()].redirectUrl,
+    };
+    const response = await window.fetch("https://api.intra.42.fr/oauth/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req_data),
     });
     if (response.status !== 200) {
       throw new Error(
-        `getToken response not ok: status ${response.status}, data ${response.data}`,
+        `getToken response not ok: status ${response.status}, data ${await response.text()}`,
       );
     }
-    const data = response.data;
+    const data = await response.json();
     console.log("getToken data", data);
     localStorage.token = data.access_token;
     localStorage.tokenExpiry = data.secret_valid_until;
@@ -52,37 +50,27 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
   async function refreshTokenIfNeeded() {
     let tokenExpiry = new Date(localStorage.tokenExpiry || 0 * 1000);
-    if (tokenExpiry < new Date()) {
+    if (tokenExpiry <= new Date()) {
       console.log("Token expired, refreshing");
-      await getToken(localStorage.refreshToken || "", "refresh_token");
+      await getToken(localStorage.refreshToken, "refresh_token");
     }
   }
 
   async function getLoginData(login: string): Promise<object> {
     refreshTokenIfNeeded();
-    // const res = await fetch(`https://api.intra.42.fr/v2/users/${login}`, {
-    //   mode: "cors",
-    //   headers: {
-    //     // Accept: "application/json",
-    //     // "Content-Type": "application/json",
-    //     Authorization: `Bearer ${localStorage.token}`,
-    //   },
-    // }).then((e) => e.json());
-    const response = await CapacitorHttp.get({
-      url: `https://api.intra.42.fr/v2/users/${login}`,
-      headers: {
-        // Accept: "application/json",
-        // "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.token}`,
+    const response = await window.fetch(
+      `https://api.intra.42.fr/v2/users/${login}`,
+      {
+        headers: { Authorization: `Bearer ${localStorage.token}` },
       },
-    });
-    if (response.status !== 200) {
+    );
+    if (!response.ok) {
       throw new Error(
-        `getLoginData response not ok: status ${response.status}, data ${response.data}`,
+        `getLoginData response not ok: status ${response.status}, data ${await response.text()}`,
       );
     }
     console.log("getLoginData", response);
-    return response.data;
+    return await response.json();
   }
 
   async function signout() {
@@ -96,6 +84,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     if (!localStorage.token) {
       console.log("No token, starting oauth");
       await GenericOAuth2.authenticate(oauth2Options).then(async (res) => {
+        console.log("oauth authenticate", JSON.stringify(res));
         const code = res.authorization_response.code;
         if (!code) {
           throw new Error(
