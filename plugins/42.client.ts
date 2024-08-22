@@ -83,7 +83,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     localStorage.removeItem("token");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("tokenExpiry");
-    reloadNuxtApp();
+    reloadNuxtApp({ force: true, path: "/" });
   }
 
   // auto login
