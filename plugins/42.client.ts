@@ -56,7 +56,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     }
   }
 
-  async function getLoginData(login: string): Promise<UserApiResponse> {
+  async function getLoginData(login: string): Promise<UserApiResponse | null> {
     refreshTokenIfNeeded();
     const response = await window.fetch(
       `https://api.intra.42.fr/v2/users/${login}`,
@@ -64,8 +64,11 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         headers: { Authorization: `Bearer ${localStorage.token}` },
       },
     );
-    // TODO: handle incorrect login
     if (!response.ok) {
+      if (response.status === 404) {
+        console.log("getLoginData login not found");
+        return null;
+      }
       throw new Error(
         `getLoginData response not ok: status ${response.status}, data ${await response.text()}`,
       );

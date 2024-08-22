@@ -3,7 +3,11 @@ const { $getLoginData } = useNuxtApp();
 const route = useRoute();
 const data = ref<UserApiResponse>();
 try {
-  data.value = await $getLoginData(route.params.login as string);
+  const res = await $getLoginData(route.params.login as string);
+  if (!res) {
+    throw new Error("login not found: " + route.params.login);
+  }
+  data.value = res;
 } catch (error) {
   console.error(error);
   showError("erreur lors de la recherche: " + error);
