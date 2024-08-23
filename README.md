@@ -1,8 +1,8 @@
 bonus:
 
-- refresh token on expiration
-- prettier overall styles
-- better projects styles: green/red for validated projects, star for 125% projects
+- refresh token on expiration: done
+- prettier overall styles: done
+- better projects styles(green/red for validated projects, star for 125% projects)
 - show all cursus levels instead of a single one
 - /about page
 
