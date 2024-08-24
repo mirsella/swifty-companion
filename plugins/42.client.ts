@@ -44,12 +44,14 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     const data = await response.json();
     console.log("getToken data", data);
     localStorage.token = data.access_token;
-    localStorage.tokenExpiry = data.secret_valid_until;
+    const date = new Date();
+    date.setSeconds(date.getSeconds() + data.expires_in);
+    localStorage.tokenExpiryDate = date;
     localStorage.refreshToken = data.refresh_token;
   }
 
   async function refreshTokenIfNeeded() {
-    let tokenExpiry = new Date(localStorage.tokenExpiry || 0 * 1000);
+    let tokenExpiry = new Date(localStorage.tokenExpiryDate);
     if (tokenExpiry <= new Date()) {
       console.log("Token expired, refreshing");
       await getToken(localStorage.refreshToken, "refresh_token");
@@ -82,7 +84,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   async function signout() {
     localStorage.removeItem("token");
     localStorage.removeItem("refreshToken");
-    localStorage.removeItem("tokenExpiry");
+    localStorage.removeItem("tokenExpiryDate");
     reloadNuxtApp({ force: true, path: "/" });
   }
 
