@@ -1,7 +1,7 @@
 import { GenericOAuth2 } from "@capacitor-community/generic-oauth2";
-import { Capacitor, CapacitorHttp } from "@capacitor/core";
+import { Capacitor } from "@capacitor/core";
 
-export default defineNuxtPlugin(async (nuxtApp) => {
+export default defineNuxtPlugin(async () => {
   const runtimeConfig = useRuntimeConfig();
   const oauth2Options = {
     authorizationBaseUrl: "https://api.intra.42.fr/oauth/authorize",
@@ -21,16 +21,23 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   };
 
   // grant_type can be "authorization_code" or "refresh_token"
-  async function getToken(code: string, grant_type: string) {
+  async function getToken(
+    code: string,
+    grant_type: "authorization_code" | "refresh_token",
+  ) {
     console.log("getToken grant_type", grant_type);
-    const req_data = {
+    const req_data: any = {
       grant_type,
-      code,
       client_id: runtimeConfig.public.CLIENT_ID,
       client_secret: runtimeConfig.public.CLIENT_SECRET,
       // @ts-ignore: getPlatform always returns android or web
       redirect_uri: oauth2Options[Capacitor.getPlatform()].redirectUrl,
     };
+    if (grant_type === "refresh_token") {
+      req_data.refresh_token = code;
+    } else {
+      req_data.code = code;
+    }
     const response = await window.fetch("https://api.intra.42.fr/oauth/token", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
