@@ -1,18 +1,21 @@
 <script setup lang="ts">
-const { $getLoginData } = useNuxtApp();
+const { $getLoginData, $signout } = useNuxtApp();
 const route = useRoute();
-const data = ref<UserApiResponse>();
+const data = ref<UserApiResponse | null>(null);
 try {
   const res = await $getLoginData(route.params.login as string);
   if (!res) {
-    throw new Error("login not found: " + route.params.login);
+    await navigateTo("/");
   }
   data.value = res;
 } catch (error) {
   console.error(error);
-  showError("erreur lors de la recherche: " + error);
+  await $signout();
 }
 const skills = computed(() => {
+  if (!data.value) {
+    return [];
+  }
   let max_cursus: CursusUser = data.value?.cursus_users[0]!;
   for (const cursus of data.value?.cursus_users.slice(1)!) {
     if (cursus.skills.length > max_cursus.skills.length) {

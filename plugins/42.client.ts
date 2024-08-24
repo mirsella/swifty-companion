@@ -75,7 +75,8 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         console.log(
           `api returned 401, reloading oauth: ${await response.text()}`,
         );
-        reloadNuxtApp({ force: true });
+        await refreshTokenIfNeeded();
+        return getLoginData(login);
       }
       throw new Error(
         `response status ${response.status}, data ${await response.text()}`,
@@ -89,7 +90,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     localStorage.removeItem("token");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("tokenExpiryDate");
-    reloadNuxtApp({ force: true, path: "/" });
+    reloadNuxtApp({ force: true });
   }
 
   // auto login
