@@ -71,8 +71,12 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         console.log("getLoginData login not found");
         return null;
       }
-      // NOTE: we could intercept 401 here and re try oauth, for example in case of revoked token
-      // but thoses errors are not expected, throwing is acceptable
+      if (response.status === 401) {
+        console.log(
+          `api returned 401, reloading oauth: ${await response.text()}`,
+        );
+        reloadNuxtApp({ force: true });
+      }
       throw new Error(
         `response status ${response.status}, data ${await response.text()}`,
       );
