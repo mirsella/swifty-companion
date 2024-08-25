@@ -6,9 +6,6 @@ defineProps({
 
 <template>
   <div class="flex flex-col h-screen">
-    <NuxtLink to="/" class="m-6">
-      <Logo class="w-14" />
-    </NuxtLink>
     <div class="mb-auto mt-6 grid place-items-center gap-4 m-2">
       <p class="text-3xl font-bold">Une erreur est survenue.</p>
       <p class="text-xl font-bold text-error text-wrap w-full text-center">
