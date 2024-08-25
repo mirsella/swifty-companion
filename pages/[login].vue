@@ -5,7 +5,7 @@ const data = ref<UserApiResponse | null>(null);
 try {
   const res = await $getLoginData(route.params.login as string);
   if (!res) {
-    await navigateTo("/");
+    await navigateTo("/?error=login not found");
   }
   data.value = res;
 } catch (error) {

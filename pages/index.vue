@@ -1,31 +1,17 @@
 <script setup lang="ts">
-const { $getLoginData } = useNuxtApp();
 const login = ref("");
-const error = ref("");
 const loading = ref(false);
 async function search() {
   loading.value = true;
-  error.value = "";
-  // NOTE: we can do a expensive fetch because it will be cached by the browser
-  try {
-    const user = await $getLoginData(login.value || "lgillard");
-    if (user) {
-      await navigateTo(user.login);
-      loading.value = false;
-    } else {
-      loading.value = false;
-      error.value = "login not found: " + login.value;
-    }
-  } catch (error) {
-    loading.value = false;
-    showError("erreur lors de la recherche: " + error);
-  }
+  await navigateTo(login.value || "lgillard");
 }
 </script>
 
 <template>
   <div class="m-10 space-y-4">
-    <p class="text-lg text-center w-full text-error">{{ error }}</p>
+    <p class="text-lg text-center w-full text-error">
+      {{ $route.query.error }}
+    </p>
     <input
       v-model="login"
       class="input input-primary w-full"
