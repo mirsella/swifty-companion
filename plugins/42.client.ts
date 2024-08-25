@@ -53,7 +53,7 @@ export default defineNuxtPlugin(async () => {
     localStorage.token = data.access_token;
     const date = new Date();
     date.setSeconds(date.getSeconds() + data.expires_in);
-    localStorage.tokenExpiryDate = date;
+    localStorage.tokenExpiryDate = date.toISOString();
     localStorage.refreshToken = data.refresh_token;
   }
 
